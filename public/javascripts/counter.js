@@ -122,11 +122,11 @@ function renderPlayerLifeTotal(roomNum, ID) {
 
 // method that increments/decrements life counter totals
 function changePlayerLifeTotal(roomNum, ID, changeInLife) {
-    let roomDocRef = database.collection("rooms").doc("room" + roomNum);
+    let roomDocRef = db.collection("rooms").doc("room" + roomNum);
 
     roomDocRef.get().then(function(doc) {
         if (doc.exists) {
-            let currentLife = doc.data().ID;
+            let currentLife = doc.data()[ID];
             roomDocRef.update(ID, currentLife + changeInLife);
         }
         else {
