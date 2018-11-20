@@ -105,14 +105,13 @@ function getIDLife(database, roomNum, ID) {
 
 // method that calls renderLife() for each player
 function renderAllLifeTotals(database, roomNum) {
-    document.getElementById("players").innerHTML = "";
     let roomDocRef = database.collection("rooms").doc("room" + roomNum);
 
     roomDocRef.get().then(function(doc) {
         if (doc.exists) {
-            let IDs = doc.data();
-            console.log(IDs);
-            Object.keys(IDs).forEach( function(key, index) {
+            document.getElementById("players").innerHTML = "";
+            console.log(doc.data);
+            Object.keys(doc.data()).forEach( function(key, index) {
                 let life = doc.data()[key];
                 renderPlayerLifeTotal(key, life);
             });
@@ -166,25 +165,23 @@ function buttonClick(changeInLife) {
 }
 
 function clearRoom() {
-    const promptText = "Do you want to delete" + 
+    const promptText = "Do you want to delete " + 
     "all the players from this room? " +
-    "If so, enter 'DROP' in the text box below.";
-    const clear = prompt(promptText, "123");
-    if (clear.trim().toUpperCase === "DROP")
+    "If so, enter 'CLEAR' in the text box below.";
+    const clear = prompt(promptText, "");
+    if (clear.trim().toUpperCase() === "clear".trim().toUpperCase())
     {
         deletePlayersInRoom(db, 1);
     }
+    askForID()
 }
 function deletePlayersInRoom(database, roomNum) {
     let roomDocRef = database.collection("rooms").doc("room" + roomNum);
 
     roomDocRef.get().then(function(doc) {
         if (doc.exists) {
-            let IDs = doc.data();
-            console.log(IDs);
-            Object.keys(IDs).forEach( function(key, index) {
-                let life = doc.data()[key];
-                renderPlayerLifeTotal(key, life);
+            Object.keys(doc.data()).forEach( function(key, index) {
+                roomDocRef.update(key, firebase.firestore.FieldValue.delete());
             });
        }
         else {
@@ -195,7 +192,6 @@ function deletePlayersInRoom(database, roomNum) {
         console.log("Error getting document:", error);
     })
 }
-
 
 // call functions
 askForID();
