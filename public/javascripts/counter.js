@@ -1,6 +1,7 @@
 
 // Player ID
 let playerID = "";
+const roomNum = 1;
 
 firebase.initializeApp({
     apiKey: "AIzaSyBEbkeEo4QQd2uGSXs-iUzOiAlZGR3Wr-g",
@@ -14,7 +15,7 @@ const db = firebase.firestore();
 const settings = {timestampsInSnapshots: true};
 db.settings(settings);
 
-attachDocumentListener(db, 1);
+attachDocumentListener(db, roomNum);
 
 // Disable deprecated features
 db.settings({
@@ -30,8 +31,8 @@ function askForID() {
         if (player !== null && player.length === 3) {
             playerID = player.toLocaleUpperCase();
             console.log("Consulting firebase");
-            if (!duplicateID(db, 1, playerID)) {
-                addID(db, 1, playerID);
+            if (!duplicateID(db, roomNum, playerID)) {
+                addID(db, roomNum, playerID);
                 break;
             }
             promptText = "That ID already exists. \n"
@@ -42,7 +43,7 @@ function askForID() {
 function attachDocumentListener(database, roomNum) {
     database.collection("rooms").doc("room" + roomNum)
     .onSnapshot(function(doc) {
-        renderAllLifeTotals(database,1);
+        renderAllLifeTotals(database,roomNum);
     });
 }
 
@@ -75,6 +76,7 @@ function addID(database, roomNum, ID) {
     roomDocRef.get().then(function(doc) {
         if (doc.exists) {
             roomDocRef.update(ID, 20);
+            console.log("Succesfully added " + ID);
             return true;
         }
         else {
@@ -161,7 +163,7 @@ function changePlayerLifeTotal(database, roomNum, ID, changeInLife) {
     })
 }
 function buttonClick(changeInLife) {
-    changePlayerLifeTotal(db, 1, playerID, changeInLife);
+    changePlayerLifeTotal(db, roomNum, playerID, changeInLife);
 }
 
 function clearRoom() {
@@ -171,7 +173,7 @@ function clearRoom() {
     const clear = prompt(promptText, "");
     if (clear.trim().toUpperCase() === "clear".trim().toUpperCase())
     {
-        deletePlayersInRoom(db, 1);
+        deletePlayersInRoom(db, roomNum);
     }
     askForID()
 }
