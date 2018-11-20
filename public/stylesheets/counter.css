@@ -1,4 +1,26 @@
 body {
-    font: 14px "Courier New", Arial, sans-serif;
     text-align: center;
+    background-color: #fffffc;
+}
+#players {
+    font: 2rem "Courier New", Arial, sans-serif;
+    font-weight: bold;
+}
+.currentPlayer {
+    font-weight: bolder;
+    color: red;
+}
+#buttons {
+    font: 1.5rem "Courier New", Arial, sans-serif;
+    margin: auto;
+}
+.lifeButton {
+    text-align: center;
+    font-size: 2rem;
+}
+.negativeLife {
+    background-color: palevioletred;
+}
+.positiveLife {
+    background-color: greenyellow;
 }

@@ -10,7 +10,11 @@ firebase.initializeApp({
 });
 
 // Initialize Cloud Firestore through Firebase
-var db = firebase.firestore();
+const db = firebase.firestore();
+const settings = {timestampsInSnapshots: true};
+db.settings(settings);
+
+attachDocumentListener(db, 1);
 
 // Disable deprecated features
 db.settings({
@@ -33,6 +37,13 @@ function askForID() {
             promptText = "That ID already exists. \n"
         }
     }
+}
+
+function attachDocumentListener(database, roomNum) {
+    database.collection("rooms").doc("room" + roomNum)
+    .onSnapshot(function(doc) {
+        renderAllLifeTotals(database,1);
+    });
 }
 
 // Returns true if ID already exists, false otherwise
@@ -81,7 +92,7 @@ function getIDLife(database, roomNum, ID) {
     roomDocRef.get().then(function(doc) {
         if (doc.exists) {
             let life = doc.data()[ID];
-            return life;
+            return { "id": ID, "life": life };
         }
         else {
             console.log("room" + roomNum + " not found");
@@ -94,6 +105,7 @@ function getIDLife(database, roomNum, ID) {
 
 // method that calls renderLife() for each player
 function renderAllLifeTotals(database, roomNum) {
+    document.getElementById("players").innerHTML = "";
     let roomDocRef = database.collection("rooms").doc("room" + roomNum);
 
     roomDocRef.get().then(function(doc) {
@@ -101,7 +113,8 @@ function renderAllLifeTotals(database, roomNum) {
             let IDs = doc.data();
             console.log(IDs);
             Object.keys(IDs).forEach( function(key, index) {
-                renderPlayerLifeTotal(roomNum, key.trim());
+                let life = doc.data()[key];
+                renderPlayerLifeTotal(key, life);
             });
        }
         else {
@@ -114,15 +127,25 @@ function renderAllLifeTotals(database, roomNum) {
 }
 
 // (renderLife) method that inserts the proper html for each player
-function renderPlayerLifeTotal(roomNum, ID) {
-    // Urgh, I need to wait for getIDLife to finish before doing anything else.
-    let currentLife = getIDLife(db, 1, ID);
-    console.log(ID + ": " + currentLife);
+function renderPlayerLifeTotal(key, lifeTotal) {
+    console.log(key + " life: " + lifeTotal);
+    let player = ""
+    const ID = key;
+    console.log(`playerID: ${playerID}, currentID: ${ID}`);
+    if (playerID === ID)
+    {
+        player = "currentPlayer";
+    }
+    
+    let playerLifeString = `<span class=${player}>${ID}: ` + 
+    `${lifeTotal}</span><br>`;
+    document.getElementById("players").innerHTML += (
+        playerLifeString);
 }
 
 // method that increments/decrements life counter totals
-function changePlayerLifeTotal(roomNum, ID, changeInLife) {
-    let roomDocRef = db.collection("rooms").doc("room" + roomNum);
+function changePlayerLifeTotal(database, roomNum, ID, changeInLife) {
+    let roomDocRef = database.collection("rooms").doc("room" + roomNum);
 
     roomDocRef.get().then(function(doc) {
         if (doc.exists) {
@@ -135,11 +158,44 @@ function changePlayerLifeTotal(roomNum, ID, changeInLife) {
         }
 
     }).catch(function(error) {
-        console.log("ERror getting document:", error);
+        console.log("Error getting document:", error);
+    })
+}
+function buttonClick(changeInLife) {
+    changePlayerLifeTotal(db, 1, playerID, changeInLife);
+}
+
+function clearRoom() {
+    const promptText = "Do you want to delete" + 
+    "all the players from this room? " +
+    "If so, enter 'DROP' in the text box below.";
+    const clear = prompt(promptText, "123");
+    if (clear.trim().toUpperCase === "DROP")
+    {
+        deletePlayersInRoom(db, 1);
+    }
+}
+function deletePlayersInRoom(database, roomNum) {
+    let roomDocRef = database.collection("rooms").doc("room" + roomNum);
+
+    roomDocRef.get().then(function(doc) {
+        if (doc.exists) {
+            let IDs = doc.data();
+            console.log(IDs);
+            Object.keys(IDs).forEach( function(key, index) {
+                let life = doc.data()[key];
+                renderPlayerLifeTotal(key, life);
+            });
+       }
+        else {
+            console.log("room" + roomNum + " not found");
+            return false;
+        }
+    }).catch(function(error) {
+        console.log("Error getting document:", error);
     })
 }
 
 
 // call functions
 askForID();
-renderAllLifeTotals(db, 1);

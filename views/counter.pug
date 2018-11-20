@@ -3,7 +3,15 @@ html(lang="en")
     head
        link(rel="stylesheet", href="/stylesheets/counter.css")
     body
-        div(class='players')
+        div(id='players')
         |
+        div(id='buttons')
+            button.negativeLife.lifeButton(onclick='buttonClick(-5)') -5
+            button.negativeLife.lifeButton(onclick='buttonClick(-1)') -1
+            button.positiveLife.lifeButton(onclick='buttonClick(1)') +1 
+            button.positiveLife.lifeButton(onclick='buttonClick(5)') +5 
+            br
+            br
+        button.clearRoom(onclick='clearRoom()') Clear Room
         script(src="https://www.gstatic.com/firebasejs/5.5.8/firebase.js").
         script(type='text/javascript', src="/javascripts/counter.js").
